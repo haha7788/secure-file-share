@@ -76,13 +76,13 @@
 
 ### Web Interface
 
-<img src=".github/assets/web-upload.png" width="45%" alt="File Upload">
-<img src=".github/assets/web-download.png" width="45%" alt="File Download">
+<img src=".github/assets/web-upload.jpg" width="45%" alt="File Upload">
+<img src=".github/assets/web-download.jpg" width="45%" alt="File Download">
 
 ### Telegram Bot
 
-<img src=".github/assets/bot-menu.png" width="45%" alt="Bot Menu">
-<img src=".github/assets/bot-upload.png" width="45%" alt="Upload via Bot">
+<img src=".github/assets/bot-menu.jpg" width="45%" alt="Bot Menu">
+<img src=".github/assets/bot-upload.jpg" width="45%" alt="Upload via Bot">
 
 </div>
 
