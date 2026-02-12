@@ -1,27 +1,6 @@
 <template>
   <div :class="['min-h-screen transition-colors duration-300', bg, text]">
-    <header class="max-w-3xl mx-auto px-6 pt-6 pb-4">
-      <div class="flex items-center justify-between">
-        <h1 class="text-xl font-bold">{{ t.title }}</h1>
-        <div class="flex items-center gap-2">
-          <button
-            @click="toggleLang"
-            :class="['px-3 py-2 rounded-lg border transition-all flex items-center gap-2 text-sm font-medium', border, hover]"
-          >
-            <Globe :size="16" />
-            <span>{{ t.langBtn }}</span>
-          </button>
-          <button
-            @click="toggleTheme"
-            :class="['px-3 py-2 rounded-lg border transition-all flex items-center gap-2 text-sm font-medium', border, hover]"
-          >
-            <Moon v-if="theme === 'dark'" :size="16" />
-            <Sun v-else :size="16" />
-            <span>{{ theme === 'dark' ? t.themeBtn : t.themeBtnLight }}</span>
-          </button>
-        </div>
-      </div>
-    </header>
+    <AppHeader />
 
     <main class="max-w-3xl mx-auto px-6 pt-8 pb-20">
       <template v-if="!uploadResult">
@@ -30,7 +9,50 @@
           <p :class="['text-sm', muted]">E2E Encryption • No Registration • Open Source</p>
         </div>
 
-        <div :class="['rounded-2xl p-8 mb-8 shadow-sm border', card, border]">
+        <div :class="['flex gap-2 p-1.5 rounded-xl border mb-6 relative', theme === 'dark' ? 'bg-[#151515] border-gray-700' : 'bg-gray-100 border-gray-200']">
+          <div
+            class="absolute top-1.5 bottom-1.5 rounded-lg transition-all duration-300 ease-out pointer-events-none"
+            :class="theme === 'dark' ? 'bg-white' : 'bg-gray-900'"
+            :style="{
+              width: 'calc((100% - 12px - 8px) / 2)',
+              left: mainMode === 'upload' ? '6px' : 'calc(50% + 4px)'
+            }"
+          />
+          <button
+            @click="mainMode = 'upload'"
+            :class="[
+              'flex-1 px-4 py-2.5 rounded-lg font-semibold transition-all duration-300 text-sm flex items-center justify-center gap-2 relative z-10',
+              mainMode === 'upload'
+                ? (theme === 'dark' ? 'text-black' : 'text-white')
+                : (theme === 'dark' ? 'text-gray-400 hover:text-gray-300' : 'text-gray-600 hover:text-gray-800')
+            ]"
+          >
+            <Upload :size="16" />
+            {{ t.uploadMode }}
+          </button>
+          <button
+            @click="mainMode = 'p2p'"
+            :class="[
+              'flex-1 px-4 py-2.5 rounded-lg font-semibold transition-all duration-300 text-sm flex items-center justify-center gap-2 relative z-10',
+              mainMode === 'p2p'
+                ? (theme === 'dark' ? 'text-black' : 'text-white')
+                : (theme === 'dark' ? 'text-gray-400 hover:text-gray-300' : 'text-gray-600 hover:text-gray-800')
+            ]"
+          >
+            <Zap :size="16" />
+            {{ t.p2pMode }}
+          </button>
+        </div>
+
+        <div class="relative overflow-hidden">
+          <div
+            :class="[
+              'rounded-2xl p-8 mb-8 shadow-sm border transition-all duration-500',
+              card,
+              border,
+              mainMode === 'upload' ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-full absolute inset-0 pointer-events-none'
+            ]"
+          >
           <div
             :class="[
               'flex gap-2 p-1.5 rounded-xl border mb-6 relative',
@@ -55,7 +77,7 @@
                   : (theme === 'dark' ? 'text-gray-400 hover:text-gray-300' : 'text-gray-600 hover:text-gray-800')
               ]"
             >
-              <Upload :size="16" class="inline mr-2" />
+              <File :size="16" class="inline mr-2" />
               {{ t.uploadFile }}
             </button>
             <button
@@ -198,6 +220,18 @@
               </template>
             </button>
           </div>
+          </div>
+
+          <P2PContent
+            :class="[
+              'transition-all duration-500',
+              mainMode === 'p2p' ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-full absolute inset-0 pointer-events-none'
+            ]"
+            :mode="p2pMode"
+            @update:mode="p2pMode = $event"
+            :theme="theme"
+            :t="t"
+          />
         </div>
       </template>
 
@@ -293,7 +327,7 @@
                 : (theme === 'dark' ? 'text-gray-400 hover:text-gray-300' : 'text-gray-600 hover:text-gray-800')
             ]"
           >
-            <Upload :size="16" class="inline mr-2" />
+            <File :size="16" class="inline mr-2" />
             {{ t.uploadFile }}
           </button>
           <button
@@ -372,15 +406,7 @@
       </div>
     </main>
 
-    <footer>
-      <div class="max-w-3xl mx-auto px-6">
-        <div :class="['h-px w-full mb-6', theme === 'dark' ? 'bg-gray-700' : 'bg-gray-300']"></div>
-        <div :class="['flex items-center justify-between text-sm pb-6', muted]">
-          <span>© 2025 SecureFileShare</span>
-          <span>{{ t.secureFileSharing }}</span>
-        </div>
-      </div>
-    </footer>
+    <AppFooter />
 
     <Teleport to="body">
       <Transition name="fade">
@@ -474,6 +500,36 @@
                       <EyeOff v-else :size="20" />
                     </button>
                   </div>
+                  <div class="flex gap-2 mt-2 mb-1.5">
+                    <button
+                      @click="handleGeneratePassword"
+                      type="button"
+                      :class="[
+                        'flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all flex items-center justify-center gap-2 border',
+                        theme === 'dark'
+                          ? 'bg-[#1a1a1a] border-gray-700 text-white hover:bg-gray-800 hover:border-gray-600'
+                          : 'bg-gray-50 border-gray-200 text-black hover:bg-gray-100 hover:border-gray-300'
+                      ]"
+                    >
+                      <RefreshCw :size="16" />
+                      {{ t.generatePassword }}
+                    </button>
+                    <button
+                      @click="handleCopyPassword"
+                      type="button"
+                      :disabled="!password"
+                      :class="[
+                        'flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all flex items-center justify-center gap-2 border',
+                        theme === 'dark'
+                          ? 'bg-[#1a1a1a] border-gray-700 text-white hover:bg-gray-800 hover:border-gray-600'
+                          : 'bg-gray-50 border-gray-200 text-black hover:bg-gray-100 hover:border-gray-300',
+                        'disabled:opacity-40 disabled:cursor-not-allowed'
+                      ]"
+                    >
+                      <Copy :size="16" />
+                      {{ passwordCopied ? t.passwordCopied : t.copyPassword }}
+                    </button>
+                  </div>
                 </div>
 
                 <button
@@ -494,32 +550,21 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import {
-  Upload, FileText, Globe, Moon, Sun, Copy, Check,
-  X, Clock, Lock, Trash2, Shield, Zap, Code, Eye, EyeOff, ChevronDown
+  Upload, Download, FileText, Copy, Check,
+  X, Clock, Lock, Trash2, Shield, Zap, Code, Eye, EyeOff, ChevronDown, RefreshCw,
+  File, Send, ArrowDownToLine
 } from 'lucide-vue-next'
 import { apiFetch } from '../composables/useApi.js'
-import ru from '../locales/ru.js'
-import en from '../locales/en.js'
+import { generatePassword } from '../utils/passwordGenerator.js'
+import { useTheme } from '../composables/useTheme.js'
+import { useLocale } from '../composables/useLocale.js'
+import AppHeader from './AppHeader.vue'
+import AppFooter from './AppFooter.vue'
+import P2PContent from './P2PContent.vue'
 import './SecureFileShare.css'
 
-const getInitialTheme = () => {
-  if (typeof window !== 'undefined' && window.__THEME__) {
-    return window.__THEME__;
-  }
-  const stored = localStorage.getItem('securefileshare_theme');
-  if (stored) return stored;
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-};
-
-const getInitialLang = () => {
-  if (typeof window !== 'undefined' && window.__LANG__) {
-    return window.__LANG__;
-  }
-  return localStorage.getItem('securefileshare_lang') || 'ru';
-};
-
-const theme = ref(getInitialTheme())
-const lang = ref(getInitialLang())
+const { theme, bg, text, muted, border, hover, input, card } = useTheme()
+const { lang, t } = useLocale()
 const uploadType = ref('file')
 const file = ref(null)
 const fileInput = ref(null)
@@ -537,18 +582,10 @@ const dragActive = ref(false)
 const copiedCode = ref({})
 const selectedLang = ref({})
 const apiType = ref('file')
+const passwordCopied = ref(false)
 
-const translations = { ru, en }
-
-const t = computed(() => translations[lang.value])
-
-const bg = computed(() => theme.value === 'dark' ? 'bg-[#1a1a1a]' : 'bg-white')
-const text = computed(() => theme.value === 'dark' ? 'text-white' : 'text-black')
-const muted = computed(() => theme.value === 'dark' ? 'text-gray-400' : 'text-gray-600')
-const border = computed(() => theme.value === 'dark' ? 'border-gray-700' : 'border-gray-200')
-const hover = computed(() => theme.value === 'dark' ? 'hover:bg-[#222222]' : 'hover:bg-gray-200')
-const input = computed(() => theme.value === 'dark' ? 'bg-[#151515] border-gray-700' : 'bg-gray-50 border-gray-200')
-const card = computed(() => theme.value === 'dark' ? 'bg-[#151515]' : 'bg-gray-50')
+const mainMode = ref('upload')
+const p2pMode = ref('send')
 
 const features = computed(() => [
   { title: t.value.feature1, desc: t.value.feature1desc, icon: Shield },
@@ -735,7 +772,7 @@ const handleUpload = async () => {
       url: result.url
     }
   } catch (error) {
-    console.error('Upload error:', error)
+    console.error(error)
     alert(lang.value === 'ru'
       ? `Ошибка загрузки: ${error.message}`
       : `Upload error: ${error.message}`)
@@ -773,6 +810,25 @@ const copyCode = (code, idx) => {
   setTimeout(() => {
     copiedCode.value[idx] = false
   }, 2000)
+}
+
+const handleGeneratePassword = () => {
+  password.value = generatePassword(16)
+  showPassword.value = true
+}
+
+const handleCopyPassword = async () => {
+  if (!password.value) return
+  
+  try {
+    await navigator.clipboard.writeText(password.value)
+    passwordCopied.value = true
+    setTimeout(() => {
+      passwordCopied.value = false
+    }, 2000)
+  } catch (err) {
+    console.error(err)
+  }
 }
 
 onMounted(() => {

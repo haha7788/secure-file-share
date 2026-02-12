@@ -3,6 +3,7 @@ const router = express.Router();
 const { downloadLimiter, logError, validateExpiry, passwordAuth } = require('../middleware');
 const { deleteFile, getAbsolutePath, saveMetadata } = require('../services');
 const { createContentDisposition } = require('../utils/helpers');
+const fs = require('fs').promises;
 
 const activeDownloads = new Map();
 
@@ -28,8 +29,26 @@ router.post('/:id', downloadLimiter, validateExpiry, passwordAuth, async (req, r
       await saveMetadata(id, metadata);
 
       const absolutePath = getAbsolutePath(metadata.filePath);
-      const contentDisposition = createContentDisposition(metadata.filename);
 
+      if (metadata.isText) {
+        try {
+          const textContent = await fs.readFile(absolutePath, 'utf-8');
+          activeDownloads.delete(id);
+          
+          if (shouldDelete) {
+            await deleteFile(id);
+          }
+          
+          res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+          return res.send(textContent);
+        } catch (err) {
+          activeDownloads.delete(id);
+          logError('Text read error', err, { fileId: id });
+          return res.status(500).json({ error: 'Failed to read text' });
+        }
+      }
+
+      const contentDisposition = createContentDisposition(metadata.filename);
       res.setHeader('Content-Disposition', contentDisposition);
 
       res.sendFile(absolutePath, async (err) => {

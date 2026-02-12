@@ -19,6 +19,7 @@ const {
   handleSetPassword,
   handlePasswordYes,
   handlePasswordNo,
+  handlePasswordGenerate,
   handleSetDeleteAfter,
   handleDeleteAfterValue,
   handleConfirmUpload,
@@ -48,6 +49,7 @@ bot.action(/expiry_(\d+)/, (ctx) => handleExpiryValue(ctx, ctx.match[1]));
 bot.action('set_password', handleSetPassword);
 bot.action('password_yes', handlePasswordYes);
 bot.action('password_no', handlePasswordNo);
+bot.action('password_generate', handlePasswordGenerate);
 bot.action('set_delete_after', handleSetDeleteAfter);
 bot.action(/delete_(\d+)/, (ctx) => handleDeleteAfterValue(ctx, ctx.match[1]));
 bot.action('confirm_upload', handleConfirmUpload);

@@ -12,7 +12,7 @@ export function useClipboard(feedbackDuration = 2000) {
       }, feedbackDuration);
       return true;
     } catch (err) {
-      console.error('Copy failed:', err);
+      console.error(err);
       return false;
     }
   };

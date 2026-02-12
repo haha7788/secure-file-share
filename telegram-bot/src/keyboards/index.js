@@ -69,7 +69,15 @@ function getDeleteAfterKeyboard(userId) {
 function getPasswordKeyboard(userId) {
   return Markup.inlineKeyboard([
     [Markup.button.callback(i18n.t(userId, 'buttons.yes'), 'password_yes')],
+    [Markup.button.callback(i18n.t(userId, 'buttons.generatePassword'), 'password_generate')],
     [Markup.button.callback(i18n.t(userId, 'buttons.no'), 'password_no')],
+    [Markup.button.callback(i18n.t(userId, 'buttons.back'), 'upload_settings')]
+  ]);
+}
+
+function getPasswordInputKeyboard(userId) {
+  return Markup.inlineKeyboard([
+    [Markup.button.callback(i18n.t(userId, 'buttons.generatePassword'), 'password_generate')],
     [Markup.button.callback(i18n.t(userId, 'buttons.back'), 'upload_settings')]
   ]);
 }
@@ -101,6 +109,7 @@ module.exports = {
   getExpiryKeyboard,
   getDeleteAfterKeyboard,
   getPasswordKeyboard,
+  getPasswordInputKeyboard,
   getTitleKeyboard,
   getSuccessKeyboard
 };

@@ -3,19 +3,22 @@ const FormData = require('form-data');
 
 const API_URL = process.env.API_URL || 'http://localhost:3000';
 
-async function uploadFile(fileStream, filename, settings) {
+async function uploadFile({ fileUrl, filename, expiry, password, deleteAfter }) {
+  const axios = require('axios');
+  const fileStream = await axios.get(fileUrl, { responseType: 'stream' });
+  
   const form = new FormData();
 
-  form.append('file', fileStream, {
+  form.append('file', fileStream.data, {
     filename: filename,
     contentType: 'application/octet-stream'
   });
 
-  form.append('expiry', settings.expiry.toString());
-  if (settings.password) {
-    form.append('password', settings.password);
+  form.append('expiry', expiry.toString());
+  if (password) {
+    form.append('password', password);
   }
-  form.append('deleteAfter', settings.deleteAfter.toString());
+  form.append('deleteAfter', deleteAfter.toString());
 
   const response = await axios.post(`${API_URL}/upload`, form, {
     headers: form.getHeaders()
@@ -24,13 +27,13 @@ async function uploadFile(fileStream, filename, settings) {
   return response.data;
 }
 
-async function uploadText(title, content, settings) {
+async function uploadText({ title, content, expiry, password, deleteAfter }) {
   const response = await axios.post(`${API_URL}/upload/text`, {
     title: title || undefined,
     content: content,
-    expiry: settings.expiry,
-    password: settings.password || undefined,
-    deleteAfter: settings.deleteAfter
+    expiry: expiry,
+    password: password || undefined,
+    deleteAfter: deleteAfter
   });
 
   return response.data;

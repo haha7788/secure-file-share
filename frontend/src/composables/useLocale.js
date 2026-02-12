@@ -2,16 +2,17 @@ import { ref, computed, onMounted } from 'vue'
 import ru from '../locales/ru.js'
 import en from '../locales/en.js'
 
-export function useLocale() {
-  const getInitialLang = () => {
-    if (typeof window !== 'undefined' && window.__LANG__) {
-      return window.__LANG__
-    }
-    return localStorage.getItem('securefileshare_lang') || 'ru'
+const getInitialLang = () => {
+  if (typeof window !== 'undefined' && window.__LANG__) {
+    return window.__LANG__
   }
+  return localStorage.getItem('securefileshare_lang') || 'ru'
+}
 
-  const lang = ref(getInitialLang())
-  const translations = { ru, en }
+const lang = ref(getInitialLang())
+const translations = { ru, en }
+
+export function useLocale() {
   const t = computed(() => translations[lang.value])
 
   const toggleLang = () => {
@@ -20,6 +21,8 @@ export function useLocale() {
     document.documentElement.lang = lang.value
   }
 
+  const toggleLocale = toggleLang
+
   onMounted(() => {
     document.documentElement.lang = lang.value
   })
@@ -27,6 +30,7 @@ export function useLocale() {
   return {
     lang,
     t,
-    toggleLang
+    toggleLang,
+    toggleLocale
   }
 }

@@ -63,6 +63,7 @@
 | Feature | Description |
 |---------|-------------|
 | 🔗 **Unified Links** | Upload via bot → download on web, and vice versa |
+| ⚡ **P2P Transfer** | Direct file transfer without server storage |
 | ⏰ **Auto-deletion** | By time (1-30 days) or downloads (1-100) |
 | 🔐 **Password Protection** | Optional file encryption |
 | 📄 **Text Notes** | Share text with syntax highlighting |
@@ -74,10 +75,18 @@
 
 <div align="center">
 
-### Web Interface
+### Web Interface - File Upload
 
 <img src=".github/assets/web-upload.jpg" width="45%" alt="File Upload">
 <img src=".github/assets/web-download.jpg" width="45%" alt="File Download">
+
+### P2P Direct Transfer
+
+<img src=".github/assets/web-p2p-upload.jpg" width="30%" alt="P2P Upload">
+<img src=".github/assets/web-p2p-transfer.jpg" width="30%" alt="P2P Transfer">
+<img src=".github/assets/web-p2p-complete.jpg" width="30%" alt="P2P Complete">
+
+*Direct file transfer without server storage - create transfer → share code → receive file*
 
 ### Telegram Bot
 
@@ -371,6 +380,7 @@ Made with ❤️ and ☕
 | Функция | Описание |
 |---------|----------|
 | 🔗 **Единые ссылки** | Загрузка через бот → скачивание на сайте, и наоборот |
+| ⚡ **P2P передача** | Прямая передача файлов без хранения на сервере |
 | ⏰ **Автоудаление** | По времени (1-30 дней) или скачиваниям (1-100) |
 | 🔐 **Пароль** | Опциональное шифрование |
 | 📄 **Текст** | Заметки с подсветкой синтаксиса |
@@ -382,10 +392,18 @@ Made with ❤️ and ☕
 
 <div align="center">
 
-### Веб-интерфейс
+### Веб-интерфейс - Загрузка файлов
 
 <img src=".github/assets/web-upload.jpg" width="45%" alt="Загрузка">
 <img src=".github/assets/web-download.jpg" width="45%" alt="Скачивание">
+
+### P2P Прямая передача
+
+<img src=".github/assets/web-p2p-upload.jpg" width="30%" alt="P2P Загрузка">
+<img src=".github/assets/web-p2p-transfer.jpg" width="30%" alt="P2P Передача">
+<img src=".github/assets/web-p2p-complete.jpg" width="30%" alt="P2P Завершено">
+
+*Прямая передача файлов без хранения на сервере - создать передачу → поделиться кодом → получить файл*
 
 ### Telegram Bot
 

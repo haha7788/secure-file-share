@@ -5,6 +5,7 @@ const {
   getExpiryKeyboard,
   getDeleteAfterKeyboard,
   getPasswordKeyboard,
+  getPasswordInputKeyboard,
   getTitleKeyboard,
   getSuccessKeyboard,
   getBackKeyboard
@@ -12,17 +13,20 @@ const {
 const { uploadFile, uploadText } = require('../services/api');
 const { formatBytes, formatDate, buildFileUrl, escapeHtml, escapeFilename } = require('../utils/helpers');
 const { validateFileSize, extractMediaFile, MAX_TEXT_SIZE } = require('../utils/file-validator');
+const { generatePassword } = require('../utils/password-generator');
 
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
 async function handleUploadFile(ctx) {
   const userId = ctx.from.id;
+  clearSession(userId);
   setState(userId, 'awaiting_file');
   await ctx.editMessageText(i18n.t(userId, 'upload.sendFile'), getBackKeyboard(userId));
 }
 
 async function handleUploadText(ctx) {
   const userId = ctx.from.id;
+  clearSession(userId);
   setState(userId, 'awaiting_text_title');
   await ctx.editMessageText(i18n.t(userId, 'upload.askTitle'), getTitleKeyboard(userId));
 }
@@ -89,7 +93,7 @@ async function handleTextInput(ctx) {
   }
 }
 
-async function showUploadSettings(ctx, userId, isEdit = false) {
+async function showUploadSettings(ctx, userId, isEdit = false, generatedPassword = null) {
   const session = getSession(userId);
   const { expiry, password, deleteAfter } = session.uploadSettings;
 
@@ -100,13 +104,17 @@ async function showUploadSettings(ctx, userId, isEdit = false) {
   const deleteLabel =
     deleteAfter === 0 ? i18n.t(userId, 'uploadSettings.downloads')[0] : `${deleteAfter} ${i18n.t(userId, 'common.downloads')}`;
 
-  const message = i18n.t(userId, configureKey) +
+  let message = i18n.t(userId, configureKey) +
     '\n\n' +
     i18n.t(userId, 'uploadSettings.currentSettings', {
       expiry: expiryLabel,
       password: password ? i18n.t(userId, 'common.protected') : i18n.t(userId, 'common.no'),
       deleteAfter: deleteLabel
     });
+
+  if (generatedPassword) {
+    message += `\n\n🔑 ${i18n.t(userId, 'upload.passwordGenerated')}\n<code>${generatedPassword}</code>`;
+  }
 
   const options = { parse_mode: 'HTML', ...getSettingsKeyboard(userId) };
 
@@ -161,7 +169,15 @@ async function handlePasswordValue(ctx, value) {
 
   if (value === 'yes') {
     setState(userId, 'awaiting_password');
-    await ctx.editMessageText(i18n.t(userId, 'upload.setPassword'), getBackKeyboard(userId));
+    await ctx.editMessageText(i18n.t(userId, 'upload.enterPassword'), getPasswordInputKeyboard(userId));
+  } else if (value === 'generate') {
+    const generatedPassword = generatePassword(16);
+    session.uploadSettings.password = generatedPassword;
+    setState(userId, 'configuring_upload');
+    
+    await ctx.answerCbQuery();
+    
+    await showUploadSettings(ctx, userId, true, generatedPassword);
   } else {
     session.uploadSettings.password = null;
     setState(userId, 'configuring_upload');
@@ -176,6 +192,10 @@ async function handlePasswordYes(ctx) {
 
 async function handlePasswordNo(ctx) {
   await handlePasswordValue(ctx, 'no');
+}
+
+async function handlePasswordGenerate(ctx) {
+  await handlePasswordValue(ctx, 'generate');
 }
 
 async function handleSetDeleteAfter(ctx) {
@@ -231,20 +251,37 @@ async function handleConfirmUpload(ctx) {
     }
 
     const { id, expiryDate } = result;
-    const url = buildFileUrl(id, isText);
+    const url = buildFileUrl(FRONTEND_URL, id, isText);
+    const expiryDateStr = formatDate(expiryDate);
 
-    const successMessage = isText
-      ? i18n.t(userId, 'upload.textSuccess')
-      : i18n.t(userId, 'upload.fileSuccess');
+    let messageText;
 
-    const expiryDateStr = formatDate(expiryDate, userId);
+    if (isText) {
+      const deleteLabel = deleteAfter === 0 
+        ? i18n.t(userId, 'common.never') 
+        : `${deleteAfter} ${i18n.t(userId, 'common.downloads')}`;
 
-    let messageText = `${successMessage}\n\n<b>${i18n.t(userId, 'common.link')}:</b> ${url}\n<b>${i18n.t(userId, 'common.expiryDate')}:</b> ${escapeHtml(expiryDateStr)}`;
+      messageText = i18n.t(userId, 'upload.successText') + '\n';
+      messageText += `📅 <b>${i18n.t(userId, 'common.expiryDate')}:</b> ${escapeHtml(expiryDateStr)}\n`;
+      messageText += `🔒 <b>${i18n.t(userId, 'common.password')}:</b> ${password ? i18n.t(userId, 'common.protected') : i18n.t(userId, 'common.notProtected')}\n`;
+      messageText += `🗑 <b>${i18n.t(userId, 'common.deleteAfter')}:</b> ${deleteLabel}\n\n`;
+      messageText += `🔗 <b>${i18n.t(userId, 'common.link')}:</b>\n<code>${url}</code>\n\n`;
+      messageText += i18n.t(userId, 'common.linkWorksEverywhere');
+    } else {
+      const fileSize = session.tempFile?.file_size || 0;
+      const fileName = session.tempFile?.file_name || '';
+      const deleteLabel = deleteAfter === 0 
+        ? i18n.t(userId, 'common.never') 
+        : `${deleteAfter} ${i18n.t(userId, 'common.downloads')}`;
 
-    if (!isText && session.tempFile) {
-      const fileSize = session.tempFile.file_size || 0;
-      const fileName = session.tempFile.file_name || '';
-      messageText += `\n<b>${i18n.t(userId, 'common.filename')}:</b> ${escapeFilename(fileName)}\n<b>${i18n.t(userId, 'common.size')}:</b> ${formatBytes(fileSize)}`;
+      messageText = i18n.t(userId, 'upload.success') + '\n';
+      messageText += `📄 <b>${i18n.t(userId, 'common.filename')}:</b> ${escapeFilename(fileName)}\n`;
+      messageText += `📦 <b>${i18n.t(userId, 'common.size')}:</b> ${formatBytes(fileSize)}\n`;
+      messageText += `📅 <b>${i18n.t(userId, 'common.expiryDate')}:</b> ${escapeHtml(expiryDateStr)}\n`;
+      messageText += `🔒 <b>${i18n.t(userId, 'common.password')}:</b> ${password ? i18n.t(userId, 'common.protected') : i18n.t(userId, 'common.notProtected')}\n`;
+      messageText += `🗑 <b>${i18n.t(userId, 'common.deleteAfter')}:</b> ${deleteLabel}\n\n`;
+      messageText += `🔗 <b>${i18n.t(userId, 'common.link')}:</b>\n<code>${url}</code>\n\n`;
+      messageText += i18n.t(userId, 'common.linkWorksEverywhere');
     }
 
     await ctx.editMessageText(messageText, { parse_mode: 'HTML', ...getSuccessKeyboard(userId, url) });
@@ -275,6 +312,7 @@ module.exports = {
   handleSetPassword,
   handlePasswordYes,
   handlePasswordNo,
+  handlePasswordGenerate,
   handleSetDeleteAfter,
   handleDeleteAfterValue,
   handleConfirmUpload,

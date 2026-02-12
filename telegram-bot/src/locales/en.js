@@ -36,7 +36,8 @@ module.exports = {
     no: 'No',
     skip: 'Skip',
     copyLink: '📋 Copy link',
-    info: 'ℹ️ Info'
+    info: 'ℹ️ Info',
+    generatePassword: '🔐 Generate password'
   },
 
   uploadSettings: {
@@ -62,8 +63,9 @@ module.exports = {
     processing: '⏳ Processing file...',
     uploading: '⬆️ Uploading to server...',
     setPassword: '🔒 Set password to protect the file?',
-    enterPassword: '🔒 Enter password to protect the file:\n\n💡 Send any message',
+    enterPassword: '🔒 Enter password to protect the file:\n\n💡 Send any message or generate a random password',
     passwordSet: '✅ Password set',
+    passwordGenerated: 'Password generated!',
     noPassword: 'No password',
     success: '✅ <b>File uploaded successfully!</b>',
     successText: '✅ <b>Text uploaded successfully!</b>',
@@ -153,9 +155,24 @@ These parameters will be used for new uploads.`
     cancelled: '✖️ Cancelled',
     yes: 'Yes',
     no: 'No',
-    protected: 'Password protected',
+    protected: 'Protected',
     notProtected: 'No',
     never: 'Never',
-    downloads: 'downloads'
+    downloads: 'downloads',
+    tapToCopy: 'Tap the password to copy it',
+    link: 'Your link',
+    expiryDate: 'Expires',
+    filename: 'File',
+    size: 'Size',
+    password: 'Password',
+    deleteAfter: 'Delete after',
+    linkWorksEverywhere: '💡 Link works in both bot and website!'
+  },
+
+  p2p: {
+    title: '⚡ Direct Transfer',
+    description: 'Send files directly without server storage.\n\n🌐 Use web interface:\n',
+    webLink: 'Open P2P Transfer',
+    howTo: '\n\n📝 How to use:\n1. Open link above\n2. Choose Send or Receive\n3. Share code with recipient\n4. Transfer starts automatically\n\n✨ Features:\n• No server storage\n• End-to-end encryption\n• Real-time progress\n• Fast direct transfer'
   }
 };

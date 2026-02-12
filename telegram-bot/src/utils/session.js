@@ -1,4 +1,4 @@
-const sessions = new Map(); // userId -> session data
+const sessions = new Map();
 
 function getSession(userId) {
   if (!sessions.has(userId)) {
@@ -25,6 +25,11 @@ function clearSession(userId) {
   session.tempText = null;
   session.tempTitle = null;
   session.tempPassword = null;
+  session.uploadSettings = {
+    expiry: 7,
+    password: null,
+    deleteAfter: 0
+  };
 }
 
 function setState(userId, state) {

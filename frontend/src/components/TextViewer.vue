@@ -1,27 +1,6 @@
 <template>
   <div class="min-h-screen transition-colors duration-300" :class="bg">
-    <header class="max-w-3xl mx-auto px-6 pt-6 pb-4">
-      <div class="flex items-center justify-between">
-        <router-link to="/" class="text-xl font-bold" :class="text">{{ t.title }}</router-link>
-        <div class="flex items-center gap-2">
-          <button
-            @click="toggleLang"
-            :class="['px-3 py-2 rounded-lg border transition-all flex items-center gap-2 text-sm font-medium', border, hover]"
-          >
-            <Globe :size="16" />
-            <span>{{ t.langBtn }}</span>
-          </button>
-          <button
-            @click="toggleTheme"
-            :class="['px-3 py-2 rounded-lg border transition-all flex items-center gap-2 text-sm font-medium', border, hover]"
-          >
-            <Moon v-if="theme === 'dark'" :size="16" />
-            <Sun v-else :size="16" />
-            <span>{{ theme === 'dark' ? t.themeBtn : t.themeBtnLight }}</span>
-          </button>
-        </div>
-      </div>
-    </header>
+    <AppHeader />
 
     <main class="max-w-3xl mx-auto px-6 pt-8 pb-20">
       <div v-if="loading" class="text-center py-12">
@@ -51,7 +30,7 @@
       </div>
 
       <div v-else-if="textInfo">
-        <div v-if="!textContent || textInfo.hasPassword" :class="['rounded-2xl p-8 mb-6 shadow-sm border', card, border]">
+        <div :class="['rounded-2xl p-8 mb-6 shadow-sm border', card, border]">
           <div class="text-center mb-6">
             <div :class="['w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center', theme === 'dark' ? 'bg-white text-black' : 'bg-gray-900 text-white']">
               <FileType :size="40" />
@@ -208,25 +187,19 @@
       </div>
     </main>
 
-    <footer>
-      <div class="max-w-3xl mx-auto px-6">
-        <div :class="['h-px w-full mb-6', theme === 'dark' ? 'bg-gray-700' : 'bg-gray-300']"></div>
-        <div :class="['flex items-center justify-between text-sm pb-6', muted]">
-          <span>© 2025 SecuresFileShare</span>
-          <span>{{ t.secureFileSharing }}</span>
-        </div>
-      </div>
-    </footer>
+    <AppFooter />
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { Globe, Moon, Sun, FileText, FileType, Type, AlignLeft, Clock, Eye, EyeOff, Lock, Copy, Check, Download, Link, Code } from 'lucide-vue-next'
+import { FileText, FileType, Type, AlignLeft, Clock, Eye, EyeOff, Lock, Copy, Check, Download, Link, Code } from 'lucide-vue-next'
 import { useTheme } from '../composables/useTheme'
 import { useLocale } from '../composables/useLocale'
 import { useFormatters } from '../composables/useFormatters'
+import AppHeader from './AppHeader.vue'
+import AppFooter from './AppFooter.vue'
 
 const route = useRoute()
 
@@ -270,7 +243,7 @@ const fetchTextInfo = async () => {
       await fetchText()
     }
   } catch (err) {
-    console.error('Error fetching text info:', err)
+    console.error(err)
     error.value = t.value.errorLoadingText
   } finally {
     loading.value = false
@@ -342,7 +315,7 @@ const fetchText = async () => {
 
     textContent.value = await response.text()
   } catch (err) {
-    console.error('Error fetching text:', err)
+    console.error(err)
     fetchError.value = t.value.errorLoadingText
   } finally {
     fetching.value = false
@@ -357,7 +330,7 @@ const copyLink = async () => {
       linkCopied.value = false
     }, 2000)
   } catch (err) {
-    console.error('Error copying link:', err)
+    console.error(err)
   }
 }
 
@@ -369,7 +342,7 @@ const copyText = async () => {
       copied.value = false
     }, 2000)
   } catch (err) {
-    console.error('Error copying text:', err)
+    console.error(err)
   }
 }
 
@@ -411,7 +384,7 @@ const openRaw = async () => {
 
     setTimeout(() => URL.revokeObjectURL(url), 100)
   } catch (err) {
-    console.error('Error opening raw text:', err)
+    console.error(err)
     alert(t.value.errorLoadingText)
   }
 }

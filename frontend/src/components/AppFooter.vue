@@ -1,18 +1,19 @@
 <template>
-  <footer :class="[
-    'mt-8 py-4 text-center border-t transition-colors',
-    theme === 'dark' ? 'bg-gray-900 border-gray-800 text-gray-500' : 'bg-white border-gray-200 text-gray-600'
-  ]">
-    <p class="text-sm">
-      {{ new Date().getFullYear() }} {{ translations.appName }}. {{ translations.footer }}
-    </p>
+  <footer>
+    <div class="max-w-3xl mx-auto px-6">
+      <div :class="['h-px w-full mb-6', theme === 'dark' ? 'bg-gray-700' : 'bg-gray-300']"></div>
+      <div :class="['flex items-center justify-between text-sm pb-6', muted]">
+        <span>© {{ new Date().getFullYear() }} {{ translations.title }}</span>
+        <span>{{ translations.secureFileSharing }}</span>
+      </div>
+    </div>
   </footer>
 </template>
 
 <script setup>
-import { useTheme } from '../composables/useTheme';
-import { useLocale } from '../composables/useLocale';
+import { useTheme } from '../composables/useTheme'
+import { useLocale } from '../composables/useLocale'
 
-const { theme } = useTheme();
-const { t: translations } = useLocale();
+const { theme, muted } = useTheme()
+const { t: translations } = useLocale()
 </script>

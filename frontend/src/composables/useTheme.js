@@ -1,17 +1,17 @@
 import { ref, computed, onMounted } from 'vue'
 
-export function useTheme() {
-  const getInitialTheme = () => {
-    if (typeof window !== 'undefined' && window.__THEME__) {
-      return window.__THEME__
-    }
-    const stored = localStorage.getItem('securesfileshare_theme')
-    if (stored) return stored
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+const getInitialTheme = () => {
+  if (typeof window !== 'undefined' && window.__THEME__) {
+    return window.__THEME__
   }
+  const stored = localStorage.getItem('securesfileshare_theme')
+  if (stored) return stored
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+}
 
-  const theme = ref(getInitialTheme())
+const theme = ref(getInitialTheme())
 
+export function useTheme() {
   const bg = computed(() => theme.value === 'dark' ? 'bg-[#1a1a1a]' : 'bg-white')
   const text = computed(() => theme.value === 'dark' ? 'text-white' : 'text-black')
   const muted = computed(() => theme.value === 'dark' ? 'text-gray-400' : 'text-gray-600')
